@@ -1,0 +1,53 @@
+stages:
+  - build
+  - release
+
+variables:
+  GRADLE_USER_HOME: "$CI_PROJECT_DIR/.gradle"
+
+build_jar:
+  image: gradle:7.3.1-jdk8
+  stage: build
+  script:
+    - gradle clean shadowJar --no-daemon
+  artifacts:
+    paths:
+      - build/libs/530-Editor.jar
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'
+
+create_release:
+  image: alpine:latest
+  stage: release
+  dependencies:
+    - build_jar
+  script:
+    - apk add --no-cache curl git jq bash
+    - |
+      bash -c '
+      latest_tag=$(git tag --list "v*" --sort=-v:refname | head -n1)
+      if [ -z "$latest_tag" ]; then
+        latest_tag="v0.0.0"
+      fi
+      IFS="." read -r major minor patch <<<"${latest_tag#v}"
+      patch=$((patch + 1))
+      new_tag="v${major}.${minor}.${patch}"
+
+      echo "Latest tag: $latest_tag"
+      echo "New tag: $new_tag"
+
+      git config user.email "ci@example.com"
+      git config user.name "GitLab CI"
+      git tag "$new_tag"
+      git push origin "$new_tag"
+
+      curl --header "PRIVATE-TOKEN: $CI_JOB_TOKEN" \
+           --form "name=$new_tag" \
+           --form "tag_name=$new_tag" \
+           --form "description=Release $new_tag" \
+           --form "assets[links][][name]=530-Editor.jar" \
+           --form "assets[links][][url]=$CI_API_V4_URL/projects/$CI_PROJECT_ID/jobs/artifacts/master/raw/build/libs/530-Editor.jar?job=build_jar" \
+           --request POST "$CI_API_V4_URL/projects/$CI_PROJECT_ID/releases"
+      '
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "master"'

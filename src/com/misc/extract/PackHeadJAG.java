@@ -1,0 +1,73 @@
+package com.misc.extract;
+
+class PackHeadJAG {
+    public static int[] anIntArray78;
+    final int anInt44 = 4096;
+    final int anInt45 = 16;
+    final int anInt46 = 258;
+    final int anInt47 = 23;
+    final int anInt48 = 0;
+    final int anInt49 = 1;
+    final int anInt50 = 6;
+    final int anInt51 = 50;
+    final int anInt52 = 4;
+    final int anInt53 = 18002;
+    byte[] aByteArray54;
+    int anInt55;
+    int anInt56;
+    int anInt57;
+    int anInt58;
+    byte[] aByteArray59;
+    int anInt60;
+    int anInt61;
+    int anInt62;
+    int anInt63;
+    byte aByte64;
+    int anInt65;
+    boolean aBoolean66;
+    int anInt67;
+    int anInt68;
+    int anInt69;
+    int anInt70;
+    int anInt71;
+    int anInt72;
+    int anInt73;
+    int[] anIntArray74;
+    int anInt75;
+    int[] anIntArray76;
+    int[] anIntArray77;
+    int anInt79;
+    boolean[] aBooleanArray80;
+    boolean[] aBooleanArray81;
+    byte[] aByteArray82;
+    byte[] aByteArray83;
+    int[] anIntArray84;
+    byte[] aByteArray85;
+    byte[] aByteArray86;
+    byte[][] aByteArrayArray87;
+    int[][] anIntArrayArray88;
+    int[][] anIntArrayArray89;
+    int[][] anIntArrayArray90;
+    int[] anIntArray91;
+    int anInt92;
+
+    PackHeadJAG() {
+        this.anInt55 = 0;
+        this.anInt60 = 0;
+        this.anIntArray74 = new int[256];
+        this.anIntArray76 = new int[257];
+        this.anIntArray77 = new int[257];
+        this.aBooleanArray80 = new boolean[256];
+        this.aBooleanArray81 = new boolean[16];
+        this.aByteArray82 = new byte[256];
+        this.aByteArray83 = new byte[4096];
+        this.anIntArray84 = new int[16];
+        this.aByteArray85 = new byte[18002];
+        this.aByteArray86 = new byte[18002];
+        this.aByteArrayArray87 = new byte[6][258];
+        this.anIntArrayArray88 = new int[6][258];
+        this.anIntArrayArray89 = new int[6][258];
+        this.anIntArrayArray90 = new int[6][258];
+        this.anIntArray91 = new int[6];
+    }
+}

@@ -1,0 +1,6 @@
+cache_location.txt
+logs.txt
+build
+.gradle
+data
+main_file_cache.*

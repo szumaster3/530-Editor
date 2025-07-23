@@ -1,0 +1,94 @@
+/*
+ * This project is a fork of https://gitlab.com/2009scape/tools/2009scape-item-definition-editor.
+ *
+ * Licensed under the GNU Affero General Public License (AGPL) v3.0.
+ * You may obtain a copy of the License at:
+ * https://www.gnu.org/licenses/agpl-3.0.html
+ *
+ * This project is distributed under the terms of the AGPL, which means:
+ * - Any derivative works must also be licensed under the AGPL.
+ * - If you modify and deploy this software on a network server, you must provide access to the source code to users interacting with the software over the network.
+ *
+ * 2009scape Item Definition Editor
+ * Copyright (C) 2022  2009Scape / Tools
+ */
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
+plugins {
+    id 'java'
+    id 'application'
+    id 'idea'
+    id 'org.jetbrains.kotlin.jvm' version '1.8.22'
+    id 'com.github.johnrengelman.shadow' version '6.0.0'
+}
+
+group = 'org.rs'
+
+repositories {
+    mavenCentral()
+}
+
+
+dependencies {
+    implementation 'com.displee:rs-cache-library:7.2.0'
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_1_8
+    targetCompatibility = JavaVersion.VERSION_1_8
+}
+
+tasks.withType(KotlinCompile).configureEach {
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+application {
+    mainClass.set('launcher.Main')
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src']
+        }
+        resources {
+            srcDirs = ['src/main/resources']
+        }
+    }
+}
+
+shadowJar {
+    archiveBaseName.set("530-Editor")
+    archiveClassifier.set("")
+    archiveVersion.set("")
+    manifest {
+        attributes 'Main-Class': 'launcher.Main'
+    }
+}
+
+tasks.jar {
+    mainClassName = "launcher.Main"
+    archiveBaseName.set("530-Editor")
+    manifest {
+        attributes(
+                'Main-Class': 'launcher.Main'
+        )
+    }
+    exclude 'META-INF/**'
+
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}
+
+tasks.build {
+    dependsOn tasks.shadowJar
+}
