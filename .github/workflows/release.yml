@@ -48,11 +48,14 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Fetch all tags
+        run: git fetch --prune --unshallow --tags
+
       - name: Download jar artifact
         uses: actions/download-artifact@v4
         with:
           name: 530-Editor-jar
-          path: build/libs
+          path: build/libs/530-Editor-jar
 
       - name: Setup git user
         run: |
@@ -71,12 +74,9 @@ jobs:
           new_tag="v${major}.${minor}.${patch}"
           echo "Latest tag: $latest_tag"
           echo "New tag: $new_tag"
+          git tag "$new_tag"
+          git push origin "$new_tag"
           echo "new_tag=$new_tag" >> $GITHUB_OUTPUT
-
-      - name: Push new tag
-        run: |
-          git tag ${{ steps.tag.outputs.new_tag }}
-          git push origin ${{ steps.tag.outputs.new_tag }}
 
       - name: Create GitHub Release with artifact
         uses: softprops/action-gh-release@v1
@@ -84,6 +84,6 @@ jobs:
           tag_name: ${{ steps.tag.outputs.new_tag }}
           name: ${{ steps.tag.outputs.new_tag }}
           body: "Release ${{ steps.tag.outputs.new_tag }}"
-          assets: build/libs/530-Editor.jar
+          files: build/libs/530-Editor-jar/530-Editor.jar
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
