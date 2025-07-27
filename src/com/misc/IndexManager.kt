@@ -17,10 +17,10 @@ object IndexManager {
             CompressionType.GZIP,
             6,
             530,
-            named = true,
-            whirlpool = true,
-            lengths = true,
-            checksums = true,
+            named = false,
+            whirlpool = false,
+            lengths = false,
+            checksums = false,
             writeReferenceTable = true,
             id = indexId
         )

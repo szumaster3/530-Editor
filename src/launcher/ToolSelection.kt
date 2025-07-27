@@ -246,8 +246,8 @@ class ToolSelection : JFrame() {
         tabbedPane.addTab("Tools", toolsTab)
         tabbedPane.addTab("Panel", panelTab)
         tabbedPane.addTab("Cache", cacheTab)
-        tabbedPane.setEnabledAt(2, false)
-        // createIndexButton.isEnabled = false
+        tabbedPane.setEnabledAt(2, true)
+        createIndexButton.isEnabled = true
 
         this.contentPane.add(tabbedPane)
 
