@@ -771,7 +771,7 @@ public class ObjectEditor extends JFrame {
         if (arr == null) return null;
         int[] intArr = new int[arr.length];
         for (int i = 0; i < arr.length; i++) {
-            intArr[i] = arr[i];
+            intArr[i] = arr[i] & 0xFFFF;
         }
         return intArr;
     }
