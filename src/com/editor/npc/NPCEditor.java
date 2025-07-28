@@ -355,7 +355,7 @@ public class NPCEditor extends JFrame {
         this.unknownInt1.setText("" + this.defs.unknownInt1);
         this.jLabel21.setText("shadowModifier     ");
         this.unknownInt2.setText("" + this.defs.unknownInt2);
-        this.jLabel22.setText("turnSpeed             ");
+        this.jLabel22.setText("rotation             ");
         this.unknownInt3.setText("" + this.defs.unknownInt3);
         this.jLabel23.setText("drawMapDot         ");
         this.unknownInt4.setText("" + this.defs.unknownInt4);

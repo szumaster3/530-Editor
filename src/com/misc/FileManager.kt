@@ -55,9 +55,10 @@ class FileManager(private val library: CacheLibrary) : JFrame() {
             add(createAddFileButton())
             add(createRemoveFileButton())
             add(createEditFileButton())
-            add(createExportIndexButton())
             add(createRenameArchiveButton())
             add(createExportWholeIndexButton())
+            add(createExportArchiveButton())
+            add(createExportFileButton())
         }
 
         add(mainPanel)
@@ -245,19 +246,88 @@ class FileManager(private val library: CacheLibrary) : JFrame() {
         size = Dimension(100, 25)
     }
 
-    private fun createExportIndexButton(): JButton = JButton("Export index").apply {
-        addActionListener { exportIndex() }
-        size = Dimension(100, 25)
-    }
-
     private fun createRenameArchiveButton(): JButton = JButton("Rename archive").apply {
         addActionListener { renameArchive() }
         size = Dimension(120, 25)
     }
 
-    private fun createExportWholeIndexButton(): JButton = JButton("Export whole index to folder").apply {
+    private fun createExportWholeIndexButton(): JButton = JButton("Export Index").apply {
         addActionListener { exportWholeIndex() }
         size = Dimension(180, 25)
+    }
+
+    private fun createExportArchiveButton(): JButton = JButton("Export archive").apply {
+        addActionListener { exportArchive() }
+        size = Dimension(140, 25)
+    }
+
+    private fun createExportFileButton(): JButton = JButton("Export file").apply {
+        addActionListener { exportFile() }
+        size = Dimension(140, 25)
+    }
+
+    private fun exportArchive() {
+        if (selectedIndex == null || selectedArchive == null) {
+            updateActionInfoLabel("Select an archive to export.")
+            return
+        }
+
+        val archive = library.index(selectedIndex!!).archive(selectedArchive!!)
+        if (archive == null) {
+            updateActionInfoLabel("Archive not found.")
+            return
+        }
+
+        val chooser = JFileChooser()
+        chooser.fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
+        chooser.dialogTitle = "Select output folder for archive $selectedArchive"
+        val result = chooser.showSaveDialog(this)
+
+        if (result == JFileChooser.APPROVE_OPTION) {
+            val outputDir = chooser.selectedFile
+            val archiveFolder = File(outputDir, "archive_$selectedArchive")
+            archiveFolder.mkdirs()
+
+            try {
+                archive.files.forEach { (fileId, file) ->
+                    val data = file.data
+                    if (data != null) {
+                        val outFile = File(archiveFolder, "$fileId")
+                        outFile.writeBytes(data)
+                    }
+                }
+                updateActionInfoLabel("Exported archive $selectedArchive to ${archiveFolder.absolutePath}")
+            } catch (e: Exception) {
+                updateActionInfoLabel("Failed to export archive: ${e.message}")
+            }
+        }
+    }
+
+    private fun exportFile() {
+        if (selectedIndex == null || selectedArchive == null || selectedFile == null) {
+            updateActionInfoLabel("Select a file to export.")
+            return
+        }
+
+        val fileData = currentFile
+        if (fileData == null) {
+            updateActionInfoLabel("Selected file data is null.")
+            return
+        }
+
+        val chooser = JFileChooser()
+        chooser.selectedFile = File("file_${selectedFile}.dat")
+        val result = chooser.showSaveDialog(this)
+
+        if (result == JFileChooser.APPROVE_OPTION) {
+            try {
+                val outFile = chooser.selectedFile
+                outFile.writeBytes(fileData)
+                updateActionInfoLabel("Exported file $selectedFile to ${outFile.absolutePath}")
+            } catch (e: Exception) {
+                updateActionInfoLabel("Failed to export file: ${e.message}")
+            }
+        }
     }
 
     private fun findNode(

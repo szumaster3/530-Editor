@@ -197,6 +197,10 @@ class ObjectSelection : JFrame {
                 )
         )
 
+        editButton?.isEnabled = false
+        addButton?.isEnabled = false
+        duplicateButton?.isEnabled = false
+
         pack()
         addAllObjects()
     }
