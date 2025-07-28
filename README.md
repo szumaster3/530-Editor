@@ -1,8 +1,23 @@
 ## 530-Editor
 
+[![License][License: AGPL v3]][license-url] [![License][Shield: Fork]][fork-url]
+
 *Under development.*
 
-[![License][License: AGPL v3]][license-url] [![License][Shield: Fork]][fork-url]
+***
+
+### 2.0.0 Release
+
+We are excited to announce the release of a new version of the editor, now available for testing!
+
+This editor should work with cache versions `508` to `718`; however, compatibility is not guaranteed.
+
+**Please note**:
+- This is a demo version.
+- It does not include the official theme.
+- Feel free to try it out and report any issues or suggestions [here](https://github.com/szumaster3/530-Editor/issues) or [here](https://gitlab.com/rspsdev/530-Editor/-/issues).
+
+Download: [Cache Editor 2.0.0](https://mega.nz/folder/mq5z3AJQ#J8BZQmhTsSwGj6gxVEGFhA)
 
 [License: AGPL v3]: https://img.shields.io/badge/License-AGPL%20v3-khaki.svg
 
