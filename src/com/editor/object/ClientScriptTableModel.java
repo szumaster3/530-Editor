@@ -6,33 +6,33 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class ClientScriptTableModel extends AbstractTableModel {
+class ClientScriptTableModel extends AbstractTableModel {
+    private final List < Map.Entry < Integer, Object >> entries;
 
-    private final List<Map.Entry<Integer, Object>> entries;
-
-    public ClientScriptTableModel(Map<Integer, Object> data) {
-        this.entries = new ArrayList<>(data.entrySet());
+    public ClientScriptTableModel(Map < Integer, Object > clientScriptData) {
+        entries = new ArrayList < > (clientScriptData.entrySet());
     }
 
-    public void addEntry(Integer key, Object value) {
-        entries.add(new AbstractMap.SimpleEntry<>(key, value));
+    public void addRow() {
+        entries.add(new AbstractMap.SimpleEntry < > (0, ""));
         fireTableRowsInserted(entries.size() - 1, entries.size() - 1);
     }
 
-    public void removeEntry(int index) {
-        if (index >= 0 && index < entries.size()) {
-            entries.remove(index);
-            fireTableRowsDeleted(index, index);
-        }
+    public void removeRow(int rowIndex) {
+        if (rowIndex < 0 || rowIndex >= entries.size()) return;
+        entries.remove(rowIndex);
+        fireTableRowsDeleted(rowIndex, rowIndex);
     }
 
-    public List<Map.Entry<Integer, Object>> getEntries() {
-        return entries;
+    public List < Map.Entry < Integer, Object >> getEntries() {
+        return new ArrayList < > (entries);
     }
 
-    public void setEntries(List<Map.Entry<Integer, Object>> newEntries) {
+    public void setEntries(List < Map.Entry < Integer, Object >> newEntries) {
         entries.clear();
-        entries.addAll(newEntries);
+        if (newEntries != null) {
+            entries.addAll(newEntries);
+        }
         fireTableDataChanged();
     }
 
@@ -43,33 +43,7 @@ public class ClientScriptTableModel extends AbstractTableModel {
 
     @Override
     public int getColumnCount() {
-        return 2; // key, value
-    }
-
-    @Override
-    public Object getValueAt(int rowIndex, int columnIndex) {
-        Map.Entry<Integer, Object> entry = entries.get(rowIndex);
-        return columnIndex == 0 ? entry.getKey() : entry.getValue();
-    }
-
-    @Override
-    public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
-        Map.Entry<Integer, Object> entry = entries.get(rowIndex);
-        if (columnIndex == 0) {
-            try {
-                Integer key = Integer.parseInt(aValue.toString());
-                entries.set(rowIndex, new AbstractMap.SimpleEntry<>(key, entry.getValue()));
-            } catch (NumberFormatException ignored) {
-            }
-        } else if (columnIndex == 1) {
-            entries.set(rowIndex, new AbstractMap.SimpleEntry<>(entry.getKey(), aValue));
-        }
-        fireTableCellUpdated(rowIndex, columnIndex);
-    }
-
-    @Override
-    public boolean isCellEditable(int rowIndex, int columnIndex) {
-        return true; // both key and value are editable
+        return 2;
     }
 
     @Override
@@ -78,7 +52,27 @@ public class ClientScriptTableModel extends AbstractTableModel {
     }
 
     @Override
-    public Class<?> getColumnClass(int columnIndex) {
-        return Object.class;
+    public Object getValueAt(int rowIndex, int columnIndex) {
+        Map.Entry < Integer, Object > entry = entries.get(rowIndex);
+        return columnIndex == 0 ? entry.getKey() : entry.getValue();
+    }
+
+    @Override
+    public void setValueAt(Object aValue, int rowIndex, int columnIndex) {
+        Map.Entry < Integer, Object > entry = entries.get(rowIndex);
+        try {
+            if (columnIndex == 0) {
+                int key = Integer.parseInt(aValue.toString());
+                entries.set(rowIndex, new AbstractMap.SimpleEntry < > (key, entry.getValue()));
+            } else {
+                entries.set(rowIndex, new AbstractMap.SimpleEntry < > (entry.getKey(), aValue));
+            }
+            fireTableCellUpdated(rowIndex, columnIndex);
+        } catch (NumberFormatException ignored) {}
+    }
+
+    @Override
+    public boolean isCellEditable(int rowIndex, int columnIndex) {
+        return true;
     }
 }

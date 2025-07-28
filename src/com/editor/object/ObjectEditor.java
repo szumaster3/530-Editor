@@ -3,7 +3,6 @@ package com.editor.object;
 import com.cache.defs.ObjectDefinition;
 
 import javax.swing.*;
-import javax.swing.table.TableModel;
 import java.awt.*;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -11,7 +10,6 @@ import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,21 +19,19 @@ import java.util.Map;
 public class ObjectEditor extends JFrame {
     private ObjectDefinition definitions;
     private ObjectSelection objectSelection;
-    private JTextField name, options, models, childrenIds, modelColors, textureColors;
-    private JCheckBox projectileClipped, notClipped;
-    private JCheckBox isWalkable, isSolid, isInteractive, castsShadow, isProjectile;
-    private JTextField configFileId;
-    private JTextField configId;
-    private JTextField clipType;
-    private JSpinner sizeX, sizeY, scaleX, scaleY, scaleZ;
-    private JSpinner rotationX, rotationY, rotationZ;
-    private JSpinner animationId;
-    private JSpinner heightOffsetX, heightOffsetY;
 
+    private JTextField name, options, configFileId, configId, clipType;
+    private JCheckBox projectileClipped, notClipped;
+    private JTextField sizeX, sizeY;
+    private JTextField models, childrenIds, modelColors, textureColors;
+    private JTextField scaleX, scaleY, scaleZ, rotationX, rotationY, rotationZ;
+    private JTextField animationId;
+    private JCheckBox isWalkable, isSolid, isInteractive, castsShadow, isProjectile;
+    private JTextField heightOffsetX, heightOffsetY;
     private JTextField[] csk = new JTextField[7];
     private JTextField[] csv = new JTextField[7];
 
-    private Map<Integer, Object> clientScriptData;
+    private Map < Integer, Object > clientScriptData;
     private ClientScriptTableModel clientScriptModel;
     private JTable clientScriptTable;
 
@@ -43,261 +39,441 @@ public class ObjectEditor extends JFrame {
         this.definitions = definitions;
         this.objectSelection = objectSelection;
 
-        setLocationRelativeTo(null);
         setTitle("Object Editor");
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+        setLocationRelativeTo(null);
 
-        clientScriptData = definitions.clientScriptData != null ? definitions.clientScriptData : new HashMap<>();
+        clientScriptData = definitions.clientScriptData != null ? definitions.clientScriptData : new HashMap < > ();
 
         JTabbedPane tabbedPane = new JTabbedPane();
 
-        JPanel mainPanel = createMainPropertiesPanel();
-        tabbedPane.addTab("Properties", new JScrollPane(mainPanel));
-
-        JPanel clientScriptPanel = createClientScriptPanel();
-        tabbedPane.addTab("Client Scripts", clientScriptPanel);
+        tabbedPane.addTab("Properties", basicPanel());
+        tabbedPane.addTab("Advanced", secondPanel());
+        tabbedPane.addTab("Client Scripts", scriptPanel());
 
         setContentPane(tabbedPane);
 
-        setPreferredSize(new Dimension(820, 900));
+        setPreferredSize(new Dimension(700, 550));
         pack();
         setLocationRelativeTo(null);
         setVisible(true);
     }
+    private JPanel basicPanel() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        panel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-    private JPanel createMainPropertiesPanel() {
-        JPanel mainPanel = new JPanel();
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
-
-        // Basic information.
-        JPanel basicInfoPanel = new JPanel();
-        basicInfoPanel.setLayout(new BoxLayout(basicInfoPanel, BoxLayout.Y_AXIS));
+        JPanel basicInfoPanel = new JPanel(new GridBagLayout());
         basicInfoPanel.setBorder(BorderFactory.createTitledBorder("Basic information"));
-        basicInfoPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JPanel idPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(4, 4, 4, 4);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.WEST;
+
+        int row = 0;
+
         JLabel idLabel = new JLabel("Object ID:");
-        idLabel.setPreferredSize(new Dimension(120, idLabel.getPreferredSize().height));
+        idLabel.setHorizontalAlignment(SwingConstants.RIGHT);
+        idLabel.setPreferredSize(new Dimension(140, idLabel.getPreferredSize().height));
         JLabel idValueLabel = new JLabel(String.valueOf(definitions.id));
         idValueLabel.setFont(idValueLabel.getFont().deriveFont(Font.BOLD));
-        idPanel.add(idLabel);
-        idPanel.add(idValueLabel);
-        idPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        basicInfoPanel.add(idPanel);
 
-        basicInfoPanel.add(Box.createVerticalStrut(8));
-        basicInfoPanel.add(createLabel("Name:", name = new JTextField(definitions.getName())));
-        basicInfoPanel.add(Box.createVerticalStrut(8));
+        gbc.gridx = 0;
+        gbc.gridy = row;
+        gbc.weightx = 0;
+        basicInfoPanel.add(idLabel, gbc);
+
+        gbc.gridx = 1;
+        gbc.weightx = 1.0;
+        basicInfoPanel.add(idValueLabel, gbc);
+
+        row++;
+
+        name = new JTextField(definitions.getName());
+        name.setPreferredSize(new Dimension(180, 24));
+        gbc.gridx = 0;
+        gbc.gridy = row;
+        gbc.weightx = 0;
+        gbc.anchor = GridBagConstraints.EAST;
+        basicInfoPanel.add(new JLabel("Name:"), gbc);
+
+        gbc.gridx = 1;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.weightx = 1.0;
+        basicInfoPanel.add(name, gbc);
+        row++;
 
         options = new JTextField(optionsArrayToString(definitions.options));
-        basicInfoPanel.add(createLabel("Options:", options));
-        basicInfoPanel.add(Box.createVerticalStrut(8));
+        options.setPreferredSize(new Dimension(180, 24));
+        gbc.gridx = 0;
+        gbc.gridy = row;
+        gbc.weightx = 0;
+        gbc.anchor = GridBagConstraints.EAST;
+        basicInfoPanel.add(new JLabel("Options:"), gbc);
 
-        basicInfoPanel.add(createLabel("Config file ID:", configFileId = new JTextField(String.valueOf(definitions.getConfigFileId()))));
-        basicInfoPanel.add(createLabel("Config ID:", configId = new JTextField(String.valueOf(definitions.getConfigId()))));
-        basicInfoPanel.add(createLabel("Clip type:", clipType = new JTextField(String.valueOf(definitions.getClipType()))));
+        gbc.gridx = 1;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.weightx = 1.0;
+        basicInfoPanel.add(options, gbc);
+        row++;
 
-        mainPanel.add(basicInfoPanel);
-        mainPanel.add(Box.createVerticalStrut(15));
+        configFileId = new JTextField(String.valueOf(definitions.getConfigFileId()));
+        configFileId.setPreferredSize(new Dimension(180, 24));
+        gbc.gridx = 0;
+        gbc.gridy = row;
+        gbc.anchor = GridBagConstraints.EAST;
+        gbc.weightx = 0;
+        basicInfoPanel.add(new JLabel("Config file ID:"), gbc);
 
-        // Basic properties.
-        JPanel basicPropsPanel = new JPanel();
-        basicPropsPanel.setLayout(new BoxLayout(basicPropsPanel, BoxLayout.Y_AXIS));
+        gbc.gridx = 1;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.weightx = 1.0;
+        basicInfoPanel.add(configFileId, gbc);
+        row++;
+
+        configId = new JTextField(String.valueOf(definitions.getConfigId()));
+        configId.setPreferredSize(new Dimension(180, 24));
+        gbc.gridx = 0;
+        gbc.gridy = row;
+        gbc.anchor = GridBagConstraints.EAST;
+        gbc.weightx = 0;
+        basicInfoPanel.add(new JLabel("Config ID:"), gbc);
+
+        gbc.gridx = 1;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.weightx = 1.0;
+        basicInfoPanel.add(configId, gbc);
+        row++;
+
+        clipType = new JTextField(String.valueOf(definitions.getClipType()));
+        clipType.setPreferredSize(new Dimension(180, 24));
+        gbc.gridx = 0;
+        gbc.gridy = row;
+        gbc.anchor = GridBagConstraints.EAST;
+        gbc.weightx = 0;
+        basicInfoPanel.add(new JLabel("Clip type:"), gbc);
+
+        gbc.gridx = 1;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.weightx = 1.0;
+        basicInfoPanel.add(clipType, gbc);
+        row++;
+
+        animationId = new JTextField(String.valueOf(definitions.anInt3855));
+        animationId.setPreferredSize(new Dimension(180, 24));
+        gbc.gridx = 0;
+        gbc.gridy = row;
+        gbc.anchor = GridBagConstraints.EAST;
+        gbc.weightx = 0;
+        basicInfoPanel.add(new JLabel("Animation ID:"), gbc);
+
+        gbc.gridx = 1;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.weightx = 1.0;
+        basicInfoPanel.add(animationId, gbc);
+        row++;
+
+        panel.add(basicInfoPanel);
+        panel.add(Box.createVerticalStrut(15));
+
+        JPanel basicPropsPanel = new JPanel(new GridBagLayout());
         basicPropsPanel.setBorder(BorderFactory.createTitledBorder("Properties"));
-        basicPropsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JPanel clippingPanel = new JPanel();
-        clippingPanel.setLayout(new BoxLayout(clippingPanel, BoxLayout.X_AXIS));
+        row = 0;
+        gbc.weightx = 0;
+
+        JPanel clippingPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 0));
         projectileClipped = new JCheckBox("Projectile Clipped", definitions.isProjectileClipped());
         notClipped = new JCheckBox("Not Clipped", definitions.getClipped());
         clippingPanel.add(projectileClipped);
-        clippingPanel.add(Box.createHorizontalStrut(15));
         clippingPanel.add(notClipped);
-        clippingPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        basicPropsPanel.add(wrap("Clipping:", clippingPanel));
-        basicPropsPanel.add(Box.createVerticalStrut(8));
 
-        JPanel sizePanel = new JPanel(new GridBagLayout());
-        sizePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        gbc.gridx = 0;
+        gbc.gridy = row;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.WEST;
+        basicPropsPanel.add(new JLabel("Clipping:"), gbc);
+
+        row++;
+        gbc.gridy = row;
+        basicPropsPanel.add(clippingPanel, gbc);
+
+        row++;
+        gbc.gridwidth = 1;
+
+        sizeX = new JTextField(String.valueOf(definitions.getSizeX()));
+        sizeX.setPreferredSize(new Dimension(180, 24));
+        gbc.gridx = 0;
+        gbc.gridy = row;
+        gbc.anchor = GridBagConstraints.EAST;
+        basicPropsPanel.add(new JLabel("Size X:"), gbc);
+
+        gbc.gridx = 1;
+        gbc.anchor = GridBagConstraints.WEST;
+        basicPropsPanel.add(sizeX, gbc);
+
+        row++;
+
+        sizeY = new JTextField(String.valueOf(definitions.getSizeY()));
+        sizeY.setPreferredSize(new Dimension(180, 24));
+        gbc.gridx = 0;
+        gbc.gridy = row;
+        gbc.anchor = GridBagConstraints.EAST;
+        basicPropsPanel.add(new JLabel("Size Y:"), gbc);
+
+        gbc.gridx = 1;
+        gbc.anchor = GridBagConstraints.WEST;
+        basicPropsPanel.add(sizeY, gbc);
+
+        row++;
+
+        panel.add(basicPropsPanel);
+        panel.add(Box.createVerticalStrut(10));
+
+        JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
+        JButton applyButton = new JButton("Save Object");
+        applyButton.addActionListener(e -> save());
+
+        JButton exportButton = new JButton("Dump to TXT");
+        exportButton.addActionListener(e ->
+                export ());
+
+        buttonsPanel.add(applyButton);
+        buttonsPanel.add(exportButton);
+        panel.add(buttonsPanel);
+
+        return panel;
+    }
+
+    private JPanel secondPanel() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(0, 5, 0, 5);
-        gbc.gridy = 0;
-        gbc.anchor = GridBagConstraints.LINE_END;
+        gbc.insets = new Insets(4, 4, 4, 4);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.anchor = GridBagConstraints.WEST;
 
-        addLabel(sizePanel, gbc, 0, "Size X:", definitions.getSizeX());
-        addLabel(sizePanel, gbc, 2, "Size Y:", definitions.getSizeY());
-
-        basicPropsPanel.add(wrap("Size:", sizePanel));
-
-        mainPanel.add(basicPropsPanel);
-        mainPanel.add(Box.createVerticalStrut(15));
-
-        // Models and Colors.
-        JPanel modelsColorsPanel = new JPanel();
-        modelsColorsPanel.setLayout(new BoxLayout(modelsColorsPanel, BoxLayout.Y_AXIS));
+        JPanel modelsColorsPanel = new JPanel(new GridBagLayout());
         modelsColorsPanel.setBorder(BorderFactory.createTitledBorder("Models and Colors"));
-        modelsColorsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        int row = 0;
 
         models = new JTextField(intArrayToSemicolonString(definitions.models));
-        modelsColorsPanel.add(createLabel("Models:", models));
+        models.setPreferredSize(new Dimension(180, 24));
+        gbc.gridx = 0;
+        gbc.gridy = row;
+        gbc.weightx = 0;
+        gbc.anchor = GridBagConstraints.EAST;
+        modelsColorsPanel.add(new JLabel("Models:"), gbc);
+
+        gbc.gridx = 1;
+        gbc.weightx = 1.0;
+        gbc.anchor = GridBagConstraints.WEST;
+        modelsColorsPanel.add(models, gbc);
+
+        row++;
 
         childrenIds = new JTextField(intArrayToSemicolonString(definitions.childrenIds));
-        modelsColorsPanel.add(createLabel("Child IDs:", childrenIds));
+        childrenIds.setPreferredSize(new Dimension(180, 24));
+        gbc.gridx = 0;
+        gbc.gridy = row;
+        gbc.weightx = 0;
+        gbc.anchor = GridBagConstraints.EAST;
+        modelsColorsPanel.add(new JLabel("Child IDs:"), gbc);
+
+        gbc.gridx = 1;
+        gbc.weightx = 1.0;
+        gbc.anchor = GridBagConstraints.WEST;
+        modelsColorsPanel.add(childrenIds, gbc);
+
+        row++;
 
         modelColors = new JTextField(pairColorsToString(
                 shortArrayToIntArray(definitions.originalModelColors),
                 shortArrayToIntArray(definitions.modifiedModelColors)
         ));
-        modelsColorsPanel.add(createLabel("Model Colors:", modelColors));
+        modelColors.setPreferredSize(new Dimension(180, 24));
+        gbc.gridx = 0;
+        gbc.gridy = row;
+        gbc.weightx = 0;
+        gbc.anchor = GridBagConstraints.EAST;
+        modelsColorsPanel.add(new JLabel("Model Colors:"), gbc);
+
+        gbc.gridx = 1;
+        gbc.weightx = 1.0;
+        gbc.anchor = GridBagConstraints.WEST;
+        modelsColorsPanel.add(modelColors, gbc);
+
+        row++;
 
         textureColors = new JTextField(pairColorsToString(
                 shortArrayToIntArray(definitions.originalTextureColors),
                 shortArrayToIntArray(definitions.modifiedTextureColors)
         ));
-        modelsColorsPanel.add(createLabel("Texture Colors:", textureColors));
+        textureColors.setPreferredSize(new Dimension(180, 24));
+        gbc.gridx = 0;
+        gbc.gridy = row;
+        gbc.weightx = 0;
+        gbc.anchor = GridBagConstraints.EAST;
+        modelsColorsPanel.add(new JLabel("Texture Colors:"), gbc);
 
-        mainPanel.add(modelsColorsPanel);
-        mainPanel.add(Box.createVerticalStrut(15));
+        gbc.gridx = 1;
+        gbc.weightx = 1.0;
+        gbc.anchor = GridBagConstraints.WEST;
+        modelsColorsPanel.add(textureColors, gbc);
 
-        // Transformations.
-        JPanel transformPanel = new JPanel();
-        transformPanel.setLayout(new BoxLayout(transformPanel, BoxLayout.Y_AXIS));
-        transformPanel.setBorder(BorderFactory.createTitledBorder("Transformations"));
-        transformPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panel.add(modelsColorsPanel);
+        panel.add(Box.createVerticalStrut(15));
 
-        // Scale panel.
-        JPanel scalePanel = new JPanel(new GridBagLayout());
-        scalePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        gbc = new GridBagConstraints();
-        gbc.insets = new Insets(0, 5, 0, 5);
-        gbc.gridy = 0;
-        gbc.anchor = GridBagConstraints.LINE_END;
-
-        addLabel(scalePanel, gbc, 0, "Scale X:", definitions.anInt3841);
-        addLabel(scalePanel, gbc, 2, "Scale Y:", definitions.anInt3917);
-        addLabel(scalePanel, gbc, 4, "Scale Z:", definitions.anInt3902);
-        transformPanel.add(wrap("Scale:", scalePanel));
-
-        // Rotation panel.
-        JPanel rotationPanel = new JPanel(new GridBagLayout());
-        rotationPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        gbc = new GridBagConstraints();
-        gbc.insets = new Insets(0, 3, 0, 3);
-        gbc.gridy = 0;
-        gbc.anchor = GridBagConstraints.LINE_END;
-
-        addLabel(rotationPanel, gbc, 0, "Rotation X:", definitions.anInt3840);
-        addLabel(rotationPanel, gbc, 2, "Rotation Y:", definitions.anInt3878);
-        addLabel(rotationPanel, gbc, 4, "Rotation Z:", definitions.anInt3876);
-        transformPanel.add(wrap("Rotation:", rotationPanel));
-
-        mainPanel.add(transformPanel);
-        mainPanel.add(Box.createVerticalStrut(15));
-
-        // Animations.
-        animationId = new JSpinner(new SpinnerNumberModel(definitions.anInt3855, -1, 5000, 1));
-        limitSize(animationId);
-        mainPanel.add(createLabel("Animation ID:", animationId));
-        mainPanel.add(Box.createVerticalStrut(15));
-
-        // Flags.
-        JPanel flagsPanel = new JPanel();
-        flagsPanel.setLayout(new BoxLayout(flagsPanel, BoxLayout.X_AXIS));
+        JPanel flagsPanel = new JPanel(new GridBagLayout());
         flagsPanel.setBorder(BorderFactory.createTitledBorder("Flags"));
-        flagsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        isWalkable = new JCheckBox("Walkable", definitions.isWalkable());
-        isSolid = new JCheckBox("Solid", definitions.isSolid());
-        isInteractive = new JCheckBox("Interactive", definitions.isInteractive());
+        gbc.insets = new Insets(4, 8, 4, 8);
+        gbc.anchor = GridBagConstraints.WEST;
+
+        isWalkable = new JCheckBox("Is Walkable", definitions.isWalkable());
+        isSolid = new JCheckBox("Is Solid", definitions.isSolid());
+        isInteractive = new JCheckBox("Is Interactive", definitions.isInteractive());
         castsShadow = new JCheckBox("Casts Shadow", definitions.castsShadow());
-        isProjectile = new JCheckBox("Block Projectile", definitions.blocksProjectile());
+        isProjectile = new JCheckBox("Is Projectile", definitions.blocksProjectile());
 
-        flagsPanel.add(isWalkable);
-        flagsPanel.add(Box.createHorizontalStrut(10));
-        flagsPanel.add(isSolid);
-        flagsPanel.add(Box.createHorizontalStrut(10));
-        flagsPanel.add(isInteractive);
-        flagsPanel.add(Box.createHorizontalStrut(10));
-        flagsPanel.add(castsShadow);
-        flagsPanel.add(Box.createHorizontalStrut(10));
-        flagsPanel.add(isProjectile);
-
-        mainPanel.add(flagsPanel);
-        mainPanel.add(Box.createVerticalStrut(15));
-
-        // Height offsets.
-        JPanel heightOffsetPanel = new JPanel(new GridBagLayout());
-        heightOffsetPanel.setBorder(BorderFactory.createTitledBorder("Height offsets"));
-        heightOffsetPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        gbc = new GridBagConstraints();
-        gbc.insets = new Insets(0, 5, 0, 5);
+        gbc.gridx = 0;
         gbc.gridy = 0;
-        gbc.anchor = GridBagConstraints.LINE_END;
+        flagsPanel.add(isWalkable, gbc);
+        gbc.gridx = 1;
+        flagsPanel.add(isSolid, gbc);
+        gbc.gridx = 2;
+        flagsPanel.add(isInteractive, gbc);
+        gbc.gridx = 3;
+        flagsPanel.add(castsShadow, gbc);
+        gbc.gridx = 4;
+        flagsPanel.add(isProjectile, gbc);
 
-        addLabel(heightOffsetPanel, gbc, 0, "Height offset X:", definitions.anInt3883);
-        addLabel(heightOffsetPanel, gbc, 2, "Height offset Y:", definitions.anInt3915);
+        panel.add(flagsPanel);
+        panel.add(Box.createVerticalStrut(15));
 
-        mainPanel.add(heightOffsetPanel);
-        mainPanel.add(Box.createVerticalStrut(15));
+        // HEIGHT PANEL
+        JPanel heightPanel = new JPanel(new GridBagLayout());
+        heightPanel.setBorder(BorderFactory.createTitledBorder("Height Offsets"));
+        gbc.insets = new Insets(4, 4, 4, 4);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        // Buttons.
-        JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 10));
+        row = 0;
+        gbc.anchor = GridBagConstraints.EAST;
+        gbc.gridx = 0;
+        gbc.gridy = row;
+        heightPanel.add(new JLabel("Height offset X:"), gbc);
+        heightOffsetX = new JTextField(String.valueOf(definitions.anInt3883));
+        heightOffsetX.setPreferredSize(new Dimension(180, 24));
+        gbc.gridx = 1;
+        gbc.anchor = GridBagConstraints.WEST;
+        heightPanel.add(heightOffsetX, gbc);
 
-        JButton applyButton = new JButton("Save Object");
-        applyButton.addActionListener(
-                actionEvent -> save()
-        );
+        row++;
+        gbc.anchor = GridBagConstraints.EAST;
+        gbc.gridx = 0;
+        gbc.gridy = row;
+        heightPanel.add(new JLabel("Height offset Y:"), gbc);
+        heightOffsetY = new JTextField(String.valueOf(definitions.anInt3915));
+        heightOffsetY.setPreferredSize(new Dimension(180, 24));
+        gbc.gridx = 1;
+        gbc.anchor = GridBagConstraints.WEST;
+        heightPanel.add(heightOffsetY, gbc);
 
-        JButton exportButton = new JButton("Dump to TXT");
-        exportButton.addActionListener(
-                actionEvent -> export()
-        );
+        panel.add(heightPanel);
+        panel.add(Box.createVerticalStrut(15));
 
-        buttonsPanel.add(applyButton);
-        buttonsPanel.add(exportButton);
-        buttonsPanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        // TRANSFORMATIONS PANEL
+        JPanel transformPanel = new JPanel(new GridBagLayout());
+        transformPanel.setBorder(BorderFactory.createTitledBorder("Transformations"));
+        row = 0;
 
-        mainPanel.add(buttonsPanel);
+        scaleX = new JTextField(String.valueOf(definitions.anInt3841));
+        scaleX.setPreferredSize(new Dimension(60, 24));
+        scaleY = new JTextField(String.valueOf(definitions.anInt3917));
+        scaleY.setPreferredSize(new Dimension(60, 24));
+        scaleZ = new JTextField(String.valueOf(definitions.anInt3902));
+        scaleZ.setPreferredSize(new Dimension(60, 24));
 
-        return mainPanel;
+        rotationX = new JTextField(String.valueOf(definitions.anInt3840));
+        rotationX.setPreferredSize(new Dimension(60, 24));
+        rotationY = new JTextField(String.valueOf(definitions.anInt3878));
+        rotationY.setPreferredSize(new Dimension(60, 24));
+        rotationZ = new JTextField(String.valueOf(definitions.anInt3876));
+        rotationZ.setPreferredSize(new Dimension(60, 24));
+
+        gbc.insets = new Insets(4, 4, 4, 4);
+        gbc.gridx = 0;
+        gbc.gridy = row;
+        gbc.weightx = 0;
+        gbc.anchor = GridBagConstraints.EAST;
+        transformPanel.add(new JLabel("Scale (X,Y,Z):"), gbc);
+
+        gbc.gridx = 1;
+        gbc.weightx = 1.0;
+        gbc.anchor = GridBagConstraints.WEST;
+        JPanel scalePanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+        scalePanel.add(scaleX);
+        scalePanel.add(scaleY);
+        scalePanel.add(scaleZ);
+        transformPanel.add(scalePanel, gbc);
+
+        row++;
+
+        gbc.gridx = 0;
+        gbc.gridy = row;
+        gbc.weightx = 0;
+        gbc.anchor = GridBagConstraints.EAST;
+        transformPanel.add(new JLabel("Rotation (X,Y,Z):"), gbc);
+
+        gbc.gridx = 1;
+        gbc.weightx = 1.0;
+        gbc.anchor = GridBagConstraints.WEST;
+        JPanel rotationPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
+        rotationPanel.add(rotationX);
+        rotationPanel.add(rotationY);
+        rotationPanel.add(rotationZ);
+        transformPanel.add(rotationPanel, gbc);
+
+        panel.add(transformPanel);
+
+        return panel;
     }
 
-    private JPanel createClientScriptPanel() {
-        JPanel panel = new JPanel(new BorderLayout(5, 5));
+    private JPanel scriptPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
         clientScriptModel = new ClientScriptTableModel(clientScriptData);
-        clientScriptTable = new JTable((TableModel) clientScriptModel);
-        clientScriptTable.setFillsViewportHeight(true);
+        clientScriptTable = new JTable(clientScriptModel);
 
         panel.add(new JScrollPane(clientScriptTable), BorderLayout.CENTER);
 
-        JPanel buttonsPanel = new JPanel();
+        JPanel buttonsPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 10));
 
-        JButton addButton = new JButton("Add");
-        addButton.addActionListener(e -> {
-            clientScriptModel.addEntry(0, "");
-        });
+        JButton addRowButton = new JButton("Add Row");
+        addRowButton.addActionListener(e -> clientScriptModel.addRow());
 
-        JButton removeButton = new JButton("Remove");
-        removeButton.addActionListener(e -> {
-            int selected = clientScriptTable.getSelectedRow();
-            if (selected >= 0) {
-                clientScriptModel.removeEntry(selected);
+        JButton removeRowButton = new JButton("Remove Row");
+        removeRowButton.addActionListener(e -> {
+            int selectedRow = clientScriptTable.getSelectedRow();
+            if (selectedRow >= 0) {
+                clientScriptModel.removeRow(selectedRow);
             }
         });
 
         JButton saveButton = new JButton("Save Client Scripts");
-        saveButton.addActionListener(e -> {
-            saveClientScripts();
-        });
+        saveButton.addActionListener(e -> saveClientScripts());
 
         JButton loadButton = new JButton("Load Client Scripts");
-        loadButton.addActionListener(e -> {
-            loadClientScripts();
-        });
+        loadButton.addActionListener(e -> loadClientScripts());
 
-        buttonsPanel.add(addButton);
-        buttonsPanel.add(removeButton);
+        buttonsPanel.add(addRowButton);
+        buttonsPanel.add(removeRowButton);
         buttonsPanel.add(saveButton);
         buttonsPanel.add(loadButton);
 
@@ -307,101 +483,136 @@ public class ObjectEditor extends JFrame {
     }
 
     private void saveClientScripts() {
-        Map<Integer, Object> newData = new HashMap<>();
-        for (Map.Entry<Integer, Object> entry : clientScriptModel.getEntries()) {
-            if (entry.getKey() != null && entry.getValue() != null) {
-                newData.put(entry.getKey(), entry.getValue());
+        if (definitions == null) {
+            JOptionPane.showMessageDialog(this, "Definitions object is not initialized!");
+            return;
+        }
+        if (clientScriptModel == null) {
+            JOptionPane.showMessageDialog(this, "ClientScriptModel is not initialized!");
+            return;
+        }
+
+        Map < Integer, Object > newData = new HashMap < > ();
+        for (Map.Entry < Integer, Object > entry: clientScriptModel.getEntries()) {
+            Integer key = entry.getKey();
+            Object value = entry.getValue();
+            if (key != null && value != null) {
+                newData.put(key, value);
             }
         }
-        definitions.clientScriptData = (HashMap<Integer, Object>) newData;
+
+        if (definitions.clientScriptData == null) {
+            definitions.clientScriptData = new HashMap < > ();
+        }
+        definitions.clientScriptData.clear();
+        definitions.clientScriptData.putAll(newData);
+
         JOptionPane.showMessageDialog(this, "Client scripts saved to definitions.");
     }
 
     private void loadClientScripts() {
-        clientScriptData = definitions.clientScriptData != null ? definitions.clientScriptData : new HashMap<>();
-        clientScriptModel.setEntries(new ArrayList<>(clientScriptData.entrySet()));
+        if (definitions.clientScriptData == null) {
+            definitions.clientScriptData = new HashMap < > ();
+        }
+        clientScriptData = definitions.clientScriptData;
+        clientScriptModel.setEntries(new ArrayList < > (clientScriptData.entrySet()));
         clientScriptModel.fireTableDataChanged();
+
         JOptionPane.showMessageDialog(this, "Client scripts loaded from definitions.");
     }
 
-
     private void save() {
         try {
-            definitions.setName(name.getText().trim());
+            definitions.setName(name.getText());
             definitions.setOptions(parseOptionsString(options.getText()));
-            definitions.models = parseIntArray(models.getText().trim(), ";");
-            definitions.childrenIds = parseIntArray(childrenIds.getText().trim(), ";");
-            definitions.originalModelColors = toShortArray(parseOriginalColors(modelColors.getText().trim()));
-            definitions.modifiedModelColors = toShortArray(parseModifiedColors(modelColors.getText().trim()));
-            definitions.originalTextureColors = toShortArray(parseOriginalColors(textureColors.getText().trim()));
-            definitions.modifiedTextureColors = toShortArray(parseModifiedColors(textureColors.getText().trim()));
 
-            definitions.setSizeX((Integer) sizeX.getValue());
-            definitions.setSizeY((Integer) sizeY.getValue());
+            definitions.models = parseIntArray(models.getText(), ";");
+            definitions.childrenIds = parseIntArray(childrenIds.getText(), ";");
+
+            definitions.originalModelColors = toShortArray(parseOriginalColors(modelColors.getText()));
+            definitions.modifiedModelColors = toShortArray(parseModifiedColors(modelColors.getText()));
+
+            definitions.originalTextureColors = toShortArray(parseOriginalColors(textureColors.getText()));
+            definitions.modifiedTextureColors = toShortArray(parseModifiedColors(textureColors.getText()));
+
+            definitions.setSizeX(parseInt(sizeX.getText(), 1));
+            definitions.setSizeY(parseInt(sizeY.getText(), 1));
+
             definitions.setBlockProjectile(projectileClipped.isSelected());
             definitions.setClipped(notClipped.isSelected());
-            definitions.anInt3841 = (Integer) scaleX.getValue();
-            definitions.anInt3917 = (Integer) scaleY.getValue();
-            definitions.anInt3902 = (Integer) scaleZ.getValue();
-            definitions.anInt3840 = (Integer) rotationX.getValue();
-            definitions.anInt3878 = (Integer) rotationY.getValue();
-            definitions.anInt3876 = (Integer) rotationZ.getValue();
-            definitions.anInt3855 = (Integer) animationId.getValue();
+
+            definitions.anInt3841 = parseInt(scaleX.getText(), 128);
+            definitions.anInt3917 = parseInt(scaleY.getText(), 128);
+            definitions.anInt3902 = parseInt(scaleZ.getText(), 128);
+
+            definitions.anInt3840 = parseInt(rotationX.getText(), 0);
+            definitions.anInt3878 = parseInt(rotationY.getText(), 0);
+            definitions.anInt3876 = parseInt(rotationZ.getText(), 0);
+
+            definitions.anInt3855 = parseInt(animationId.getText(), -1);
+
             definitions.setWalkable(isWalkable.isSelected());
             definitions.setSolid(isSolid.isSelected());
             definitions.setInteractive(isInteractive.isSelected());
             definitions.setCastsShadow(castsShadow.isSelected());
             definitions.setBlockProjectile(isProjectile.isSelected());
-            definitions.anInt3883 = (Integer) heightOffsetX.getValue();
-            definitions.anInt3915 = (Integer) heightOffsetY.getValue();
 
-            try {
-                definitions.setConfigFileId(Integer.parseInt(configFileId.getText().trim()));
-            } catch (NumberFormatException e) {
-                definitions.setConfigFileId(-1);
-            }
-            try {
-                definitions.setConfigId(Integer.parseInt(configId.getText().trim()));
-            } catch (NumberFormatException e) {
-                definitions.setConfigId(-1);
-            }
-            try {
-                definitions.setClipType(Integer.parseInt(clipType.getText().trim()));
-            } catch (NumberFormatException e) {
-                definitions.setClipType(-1);
-            }
+            definitions.anInt3883 = parseInt(heightOffsetX.getText(), 0);
+            definitions.anInt3915 = parseInt(heightOffsetY.getText(), 0);
 
-            Map<Integer, Object> csd = new HashMap<>();
-            for (int i = 0; i < 7; i++) {
-                String keyStr = csk[i].getText().trim();
-                String valueStr = csv[i].getText().trim();
-                if (!keyStr.isEmpty() && !valueStr.isEmpty()) {
-                    try {
-                        int key = Integer.parseInt(keyStr);
-                        Object value;
-                        try {
-                            value = Integer.parseInt(valueStr);
-                        } catch (NumberFormatException ex) {
-                            value = valueStr;
-                        }
-                        csd.put(key, value);
-                    } catch (NumberFormatException ignored) {}
-                }
-            }
-            definitions.clientScriptData = (HashMap<Integer, Object>) csd;
+            definitions.setConfigFileId(parseInt(configFileId.getText(), -1));
+            definitions.setConfigId(parseInt(configId.getText(), -1));
+            definitions.setClipType(parseInt(clipType.getText(), -1));
 
-            definitions.write(ObjectSelection.Cache);
-            objectSelection.updateObjectDefs(definitions);
+      /*Map<Integer, Object> csd = new HashMap<>();
+      for (int i = 0; i < 7; i++) {
+          String keyStr = csk[i].getText();
+          String valueStr = csv[i].getText();
+
+          if (!keyStr.isEmpty() && !valueStr.isEmpty()) {
+              try {
+                  int key = Integer.parseInt(keyStr);
+                  Object value;
+                  try {
+                      value = Integer.parseInt(valueStr);
+                  } catch (NumberFormatException ex) {
+                      value = valueStr;
+                  }
+                  csd.put(key, value);
+              } catch (NumberFormatException ignored) {
+              }
+          }
+      }
+
+      if (csd.isEmpty()) {
+          definitions.clientScriptData = null;
+      } else {
+          if (definitions.clientScriptData == null || !definitions.clientScriptData.equals(csd)) {
+              definitions.clientScriptData = new HashMap<>(csd);
+          }
+      }
+      */
+
+            this.definitions.write(ObjectSelection.Companion.getCACHE());
+            this.objectSelection.updateObjectDefs(this.definitions);
 
             JOptionPane.showMessageDialog(this, "Object saved.");
-            dispose();
         } catch (Exception e) {
             JOptionPane.showMessageDialog(this, "Error saving object: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             e.printStackTrace();
         }
     }
 
-    private void export() {
+    private int parseInt(String text, int defaultValue) {
+        try {
+            return Integer.parseInt(text);
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
+
+    private void
+    export () {
         File f = new File("./data/export/items/");
         f.mkdirs();
         String lineSep = System.lineSeparator();
@@ -443,24 +654,6 @@ public class ObjectEditor extends JFrame {
         }
     }
 
-    private JPanel createLabel(String label, JComponent component) {
-        JPanel panel = new JPanel(new BorderLayout(5, 5));
-        JLabel jLabel = new JLabel(label);
-        jLabel.setPreferredSize(new Dimension(120, 25));
-        panel.add(jLabel, BorderLayout.WEST);
-        panel.add(component, BorderLayout.CENTER);
-        panel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        return panel;
-    }
-
-    private JPanel wrap(String label, JComponent component) {
-        JPanel panel = new JPanel(new BorderLayout(5, 5));
-        panel.add(new JLabel(label), BorderLayout.WEST);
-        panel.add(component, BorderLayout.CENTER);
-        panel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        return panel;
-    }
-
     private void addLabel(JPanel panel, GridBagConstraints gbc, int x, String text, int value) {
         gbc.gridx = x;
         JLabel label = new JLabel(text);
@@ -474,7 +667,7 @@ public class ObjectEditor extends JFrame {
     private String optionsArrayToString(String[] options) {
         if (options == null) return "";
         StringBuilder sb = new StringBuilder();
-        for (String option : options) {
+        for (String option: options) {
             sb.append(option == null ? "null" : option).append(";");
         }
         return sb.toString();
@@ -483,7 +676,7 @@ public class ObjectEditor extends JFrame {
     private String intArrayToSemicolonString(int[] arr) {
         if (arr == null) return "";
         StringBuilder sb = new StringBuilder();
-        for (int i : arr) {
+        for (int i: arr) {
             sb.append(i).append(";");
         }
         return sb.toString();
@@ -523,7 +716,7 @@ public class ObjectEditor extends JFrame {
         String[] parts = text.split(delimiter);
         int[] result = new int[parts.length];
         int idx = 0;
-        for (String part : parts) {
+        for (String part: parts) {
             try {
                 result[idx++] = Integer.parseInt(part.trim());
             } catch (NumberFormatException ignored) {
@@ -541,13 +734,12 @@ public class ObjectEditor extends JFrame {
         String[] pairs = text.split(";");
         int[] originals = new int[pairs.length];
         int idx = 0;
-        for (String pair : pairs) {
+        for (String pair: pairs) {
             String[] split = pair.split(":");
             if (split.length == 2) {
                 try {
                     originals[idx++] = Integer.parseInt(split[0].trim());
-                } catch (NumberFormatException ignored) {
-                }
+                } catch (NumberFormatException ignored) {}
             }
         }
         if (idx < originals.length) {
@@ -561,13 +753,12 @@ public class ObjectEditor extends JFrame {
         String[] pairs = text.split(";");
         int[] modified = new int[pairs.length];
         int idx = 0;
-        for (String pair : pairs) {
+        for (String pair: pairs) {
             String[] split = pair.split(":");
             if (split.length == 2) {
                 try {
                     modified[idx++] = Integer.parseInt(split[1].trim());
-                } catch (NumberFormatException ignored) {
-                }
+                } catch (NumberFormatException ignored) {}
             }
         }
         if (idx < modified.length) {
@@ -591,7 +782,7 @@ public class ObjectEditor extends JFrame {
     private String joinArray(String[] arr, String sep) {
         if (arr == null) return "";
         StringBuilder sb = new StringBuilder();
-        for (String s : arr) {
+        for (String s: arr) {
             if (s != null && !s.isEmpty()) {
                 if (sb.length() > 0) sb.append(sep);
                 sb.append(s);
@@ -603,7 +794,7 @@ public class ObjectEditor extends JFrame {
     private String joinIntArray(int[] arr, String sep) {
         if (arr == null) return "";
         StringBuilder sb = new StringBuilder();
-        for (int v : arr) {
+        for (int v: arr) {
             if (sb.length() > 0) sb.append(sep);
             sb.append(v);
         }
