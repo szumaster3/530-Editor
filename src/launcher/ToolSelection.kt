@@ -220,7 +220,7 @@ class ToolSelection : JFrame() {
             arrayOf(
                 "Item Editor",
                 "NPC Editor",
-                "Object Editor",
+                "Object Editor [Don't work]",
                 "Region Transfer",
                 "Interface Transfer",
                 "Index Transfer",
