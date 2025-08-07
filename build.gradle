@@ -50,7 +50,7 @@ tasks.withType(JavaCompile).configureEach {
 }
 
 application {
-    mainClass.set('launcher.Main')
+    mainClass.set('com.Main')
 }
 
 sourceSets {
@@ -74,11 +74,11 @@ shadowJar {
 }
 
 tasks.jar {
-    mainClassName = "launcher.Main"
+    mainClassName = "com.Main"
     archiveBaseName.set("530-Editor")
     manifest {
         attributes(
-                'Main-Class': 'launcher.Main'
+                'Main-Class': 'com.Main'
         )
     }
     exclude 'META-INF/**'

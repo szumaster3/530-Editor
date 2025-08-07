@@ -1,12 +1,6 @@
 ## 530-Editor
 
-[![License][License: AGPL v3]][license-url] [![License][Shield: Fork]][fork-url] [![Cache][Cache: v2]][cache-url]
-
-
-
-[Cache: v2]: https://img.shields.io/badge/CacheTool-V2-g.svg
-
-[cache-url]: https://szumaster.com/content/menu/editor.html
+[![License][License: AGPL v3]][license-url] [![License][Shield: Fork]][fork-url]
 
 [License: AGPL v3]: https://img.shields.io/badge/License-AGPL%20v3-g.svg
 
@@ -18,17 +12,9 @@
 
 ***
 
-### Information
-Fork of [2009scape-item-definition-editor](https://gitlab.com/2009scape/tools/2009scape-item-definition-editor)
+### Documentation
 
-***
-
-### Libraries / Dependencies
-This project uses the following libraries:
-
-- **rs-cache-library**: [GitHub Repository](https://github.com/Displee/rs-cache-library)
-- The [names.dat](data/names.dat) file is sourced from a public [Rune-Server thread](https://rune-server.org/threads/634-cache-file-hash-names.705673/).  
-  It is provided as-is, and all credit goes to the original contributors. If you are the rightful owner and believe this file should not be included, please contact us.
+Instructions and all related information can be found here: [libs/docs/user_manual.md](libs/docs/user_manual.md)
 
 ***
 
@@ -60,6 +46,21 @@ To build the project, you will need to have Gradle installed on your system. Fol
    ```bash
    java -jar 530-editor.jar
    ```
+
+***
+
+### Libraries / Dependencies
+This project uses the following libraries:
+
+- **rs-cache-library**: [GitHub Repository](https://github.com/Displee/rs-cache-library)
+- The [names.dat](data/names.dat) file is sourced from a public [Rune-Server thread](https://rune-server.org/threads/634-cache-file-hash-names.705673/).  
+  It is provided as-is, and all credit goes to the original contributors. If you are the rightful owner and believe this file should not be included, please contact us.
+
+***
+
+### Affiliation
+
+This project is a fork of [2009scape-item-definition-editor](https://gitlab.com/2009scape/tools/2009scape-item-definition-editor) with additional features and improvements.
 
 ***
 
