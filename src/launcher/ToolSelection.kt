@@ -68,48 +68,6 @@ class ToolSelection : JFrame() {
                 preferredSize = Dimension(100, 30)
                 alignmentX = Component.LEFT_ALIGNMENT
                 addActionListener {
-                    if (cache.isEmpty()) {
-                        JOptionPane.showMessageDialog(
-                            this,
-                            failMessage,
-                            "Error",
-                            JOptionPane.ERROR_MESSAGE
-                        )
-                        return@addActionListener
-                    }
-
-                    val chooser =
-                        JFileChooser().apply {
-                            dialogTitle = "Select folder to save sprites"
-                            fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
-                            isAcceptAllFileFilterUsed = false
-                        }
-                    val result = chooser.showSaveDialog(this)
-                    if (result == JFileChooser.APPROVE_OPTION) {
-                        val selectedDir = chooser.selectedFile
-                        Thread {
-                            try {
-                                com.misc.SpriteDumper.dumpSprites(cache, selectedDir)
-                                SwingUtilities.invokeLater {
-                                    JOptionPane.showMessageDialog(
-                                        this,
-                                        "Sprites dump completed"
-                                    )
-                                }
-                            } catch (ex: IOException) {
-                                ex.printStackTrace()
-                                SwingUtilities.invokeLater {
-                                    JOptionPane.showMessageDialog(
-                                        this,
-                                        "Error dumping sprites: ${ex.message}",
-                                        "Error",
-                                        JOptionPane.ERROR_MESSAGE
-                                    )
-                                }
-                            }
-                        }
-                            .start()
-                    }
                 }
             }
 
