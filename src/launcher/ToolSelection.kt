@@ -1,13 +1,11 @@
 package launcher
 
 import com.displee.cache.CacheLibrary
-import com.misc.IndexManager
 import com.misc.extract.IndexExport
+import com.misc.*
 import com.misc.transfer.IndexTransfer
 import com.misc.transfer.InterfaceTransfer
 import com.misc.transfer.RegionTransfer
-import com.misc.ColorPicker
-import com.misc.RegionDumper
 import com.misc.model.ModelExporter
 import com.misc.model.ModelPacker
 import com.misc.model.view.frame.ModelFrame
@@ -19,7 +17,6 @@ import java.time.format.DateTimeFormatter
 import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import javax.swing.*
-import javax.swing.border.EmptyBorder
 
 class ToolSelection : JFrame() {
     private var cache = ""
@@ -70,7 +67,6 @@ class ToolSelection : JFrame() {
                 addActionListener {
                 }
             }
-
         val cacheTab = JPanel()
         cacheTab.layout = BoxLayout(cacheTab, BoxLayout.Y_AXIS)
 
@@ -169,19 +165,15 @@ class ToolSelection : JFrame() {
 
         selectionBox.model = DefaultComboBoxModel(
             arrayOf(
-                "Item Editor",
-                "NPC Editor",
-                "Object Editor",
                 "Region Transfer",
                 "Interface Transfer",
                 "Index Transfer",
                 "Export model",
-                "Export definition lists",
                 "Export Indexes",
                 "Pack model",
                 "Pick a Color",
-                "File Manager",
                 "Model Viewer",
+                "Sprite Viewer",
                 "Map Dumper"
             ),
         )
@@ -224,55 +216,62 @@ class ToolSelection : JFrame() {
     private fun submitButtonActionPerformed(evt: ActionEvent) {
         val toolID = selectionBox.selectedIndex
         when (toolID) {
-            3 -> try {
+            0 -> try {
                 RegionTransfer(cache).isVisible = true; Main.log(toolSelected, startMessage)
             } catch (e: IOException) {
                 Main.log(toolSelected, failMessage)
             }
-            4 -> {
+            1 -> {
                 InterfaceTransfer(cache).isVisible = true; Main.log(toolSelected, startMessage)
             }
-
-            5 -> try {
+            2 -> try {
                 IndexTransfer().isVisible = true; Main.log(toolSelected, startMessage)
             } catch (e: IOException) {
                 Main.log(toolSelected, failMessage)
             }
-
-            6 -> try {
+            3 -> try {
                 ModelExporter(cache).isVisible = true; Main.log(toolSelected, startMessage)
             } catch (e: IOException) {
                 Main.log(toolSelected, failMessage)
             }
-            8 ->
+            4 ->
                 try {
                     IndexExport().isVisible = true
                     Main.log(toolSelected, startMessage)
                 } catch (e: IOException) {
                     Main.log(toolSelected, failMessage)
                 }
-            9 ->
+            5 ->
                 try {
                     ModelPacker(cache).isVisible = true
                     Main.log(toolSelected, startMessage)
                 } catch (e: IOException) {
                     Main.log(toolSelected, failMessage)
                 }
-            10 ->
+            6 ->
                 try {
                     SwingUtilities.invokeLater { ColorPicker().isVisible = true }
                     Main.log(toolSelected, startMessage)
                 } catch (e: IOException) {
                     Main.log(toolSelected, failMessage)
                 }
-            12 ->
+            7 ->
                 try {
                     SwingUtilities.invokeLater { ModelFrame(cache).isVisible = true }
                     Main.log(toolSelected, startMessage)
                 } catch (e: Exception) {
                     Main.log(toolSelected, failMessage)
                 }
-            13 -> try {
+
+            8 -> try {
+                SwingUtilities.invokeLater {
+                    SpriteManager(cache).init()
+                }
+                Main.log(toolSelected, "Sprite Manger started.")
+            } catch (e: Exception) {
+                Main.log(toolSelected, failMessage)
+            }
+            9 -> try {
                 RegionDumper(cache)
                 Main.log(toolSelected, "Map Dumper started.")
             } catch (e: Exception) {
