@@ -5,8 +5,6 @@ import core.cache.CacheIndex
 import openrs.cache.sprite.Sprite
 import openrs.util.ImageUtils
 import java.awt.*
-import java.awt.event.MouseWheelEvent
-import java.awt.event.MouseWheelListener
 import java.io.File
 import java.nio.ByteBuffer
 import javax.imageio.ImageIO
@@ -45,42 +43,64 @@ class SpriteManager(private val cache: String) : JFrame("Sprite Manager") {
 
         val leftPanel = JPanel()
         leftPanel.layout = BoxLayout(leftPanel, BoxLayout.Y_AXIS)
+        leftPanel.border = BorderFactory.createEmptyBorder(0, 0, 0, 0)
 
         val archiveScroll = JScrollPane(archiveList)
-        archiveScroll.border = TitledBorder("Archive List")
-        archiveScroll.maximumSize = Dimension(250, 300)
+        archiveScroll.border = BorderFactory.createTitledBorder("Archive List")
+        archiveScroll.viewportBorder = null
+        archiveScroll.maximumSize = Dimension(280, 300)
 
         val frameScroll = JScrollPane(frameList)
-        frameScroll.border = TitledBorder("Frame List")
-        frameScroll.maximumSize = Dimension(250, 300)
+        frameScroll.border = BorderFactory.createTitledBorder("Frame List")
+        frameScroll.viewportBorder = null
+        frameScroll.maximumSize = Dimension(280, 300)
 
         leftPanel.add(archiveScroll)
         leftPanel.add(frameScroll)
-        add(leftPanel, BorderLayout.WEST)
 
         val rightPanel = JPanel(BorderLayout())
+        rightPanel.border = BorderFactory.createEmptyBorder(0, 0, 0, 0)
+
         val zoomInfoLabel = JLabel("Zoom: Ctrl + Scroll mouse wheel", SwingConstants.CENTER)
-        zoomInfoLabel.border = TitledBorder("Info")
+        zoomInfoLabel.border = BorderFactory.createTitledBorder("Info")
         rightPanel.add(zoomInfoLabel, BorderLayout.NORTH)
+
         val imageScroll = JScrollPane(spriteLabel)
+        imageScroll.border = null
+        imageScroll.viewportBorder = null
         rightPanel.add(imageScroll, BorderLayout.CENTER)
 
-        val buttonPanel = JPanel(FlowLayout(FlowLayout.CENTER, 10, 10))
+        val buttonPanel = JPanel(GridLayout(2, 4, 5, 5))
+
         val replaceButton = JButton("Replace Frame")
         val dumpFrameButton = JButton("Dump Frame")
         val dumpAllFromArchiveButton = JButton("Dump All Frames")
-        val exportAllButton = JButton("Export All")
+        val exportAllButton = JButton("Export All Archives")
         val addFrameButton = JButton("Add Frame")
+        val addArchiveButton = JButton("Add Archive")
+        val deleteFrameButton = JButton("Delete Frame")
+        val removeArchiveButton = JButton("Delete Archive")
 
-        buttonPanel.add(replaceButton)
-        buttonPanel.add(dumpFrameButton)
-        buttonPanel.add(dumpAllFromArchiveButton)
-        buttonPanel.add(exportAllButton)
-        buttonPanel.add(addFrameButton)
+        val buttons = listOf(
+            replaceButton, dumpFrameButton, dumpAllFromArchiveButton, exportAllButton,
+            addFrameButton, addArchiveButton, deleteFrameButton, removeArchiveButton
+        )
+
+        buttons.forEach { button ->
+            button.preferredSize = Dimension(130, 30)
+            buttonPanel.add(button)
+        }
 
         rightPanel.add(buttonPanel, BorderLayout.SOUTH)
 
-        add(rightPanel, BorderLayout.CENTER)
+        val splitPane = JSplitPane(JSplitPane.HORIZONTAL_SPLIT, leftPanel, rightPanel)
+        splitPane.resizeWeight = 0.1
+        splitPane.isOneTouchExpandable = true
+        splitPane.border = null
+
+        add(splitPane, BorderLayout.CENTER)
+
+        (contentPane as JPanel).border = BorderFactory.createEmptyBorder(0, 0, 0, 0)
 
         archiveList.addListSelectionListener {
             if (!it.valueIsAdjusting) {
@@ -125,26 +145,46 @@ class SpriteManager(private val cache: String) : JFrame("Sprite Manager") {
         addFrameButton.addActionListener {
             val archiveId = archiveList.selectedValue ?: return@addActionListener
             val pngFile = selectImageFile() ?: return@addActionListener
-            addFrame(archiveId, pngFile)
+            addFrameToArchive(archiveId, pngFile)
         }
 
-        spriteLabel.addMouseWheelListener(object : MouseWheelListener {
-            override fun mouseWheelMoved(e: MouseWheelEvent) {
-                if (e.isControlDown) {
-                    val rotation = e.wheelRotation
-                    if (rotation < 0) {
-                        zoom *= 1.1
-                        if (zoom > 5.0) zoom = 5.0
-                    } else {
-                        zoom /= 1.1
-                        if (zoom < 0.1) zoom = 0.1
-                    }
-                    val frameIndex = frameList.selectedValue ?: return
-                    showFrame(frameIndex)
-                    e.consume()
-                }
+        addArchiveButton.addActionListener {
+            addNewArchiveWithFrame()
+        }
+
+        deleteFrameButton.addActionListener {
+            val archiveId = archiveList.selectedValue ?: return@addActionListener
+            val frameIndex = frameList.selectedValue ?: return@addActionListener
+            deleteFrameFromArchive(archiveId, frameIndex)
+        }
+
+        removeArchiveButton.addActionListener {
+            val archiveId = archiveList.selectedValue
+            if (archiveId == null) {
+                JOptionPane.showMessageDialog(this, "No archive selected.", "Error", JOptionPane.ERROR_MESSAGE)
+                return@addActionListener
             }
-        })
+            val confirm = JOptionPane.showConfirmDialog(this, "Are you sure you want to remove archive $archiveId?", "Confirm", JOptionPane.YES_NO_OPTION)
+            if (confirm == JOptionPane.YES_OPTION) {
+                removeArchive(archiveId)
+            }
+        }
+
+        spriteLabel.addMouseWheelListener { e ->
+            if (e.isControlDown) {
+                val rotation = e.wheelRotation
+                if (rotation < 0) {
+                    zoom *= 1.1
+                    if (zoom > 5.0) zoom = 5.0
+                } else {
+                    zoom /= 1.1
+                    if (zoom < 0.1) zoom = 0.1
+                }
+                val frameIndex = frameList.selectedValue ?: return@addMouseWheelListener
+                showFrame(frameIndex)
+                e.consume()
+            }
+        }
 
         loadCache(File(cache))
         isVisible = true
@@ -210,6 +250,9 @@ class SpriteManager(private val cache: String) : JFrame("Sprite Manager") {
             val newData = currentSprite?.encode() ?: return
             cacheLibrary.put(CacheIndex.SPRITES.id, archiveId, newData.array(), null)
             JOptionPane.showMessageDialog(this, "Frame replaced successfully.")
+            loadFrames(archiveId)
+            frameList.selectedIndex = frameIndex
+            showFrame(frameIndex)
         } catch (e: Exception) {
             e.printStackTrace()
             JOptionPane.showMessageDialog(this, "Failed to replace frame: ${e.message}", "Error", JOptionPane.ERROR_MESSAGE)
@@ -262,6 +305,119 @@ class SpriteManager(private val cache: String) : JFrame("Sprite Manager") {
         JOptionPane.showMessageDialog(this, "Exported all archives.")
     }
 
+    private fun addFrameToArchive(archiveId: Int, pngFile: File) {
+        try {
+            val image = ImageIO.read(pngFile) ?: return
+            val oldSprite = currentSprite ?: return
+
+            val newSprite = Sprite(oldSprite.width, oldSprite.height, oldSprite.size() + 1)
+
+            for (i in 0 until oldSprite.size()) {
+                newSprite.setFrame(i, oldSprite.getFrame(i))
+            }
+
+            newSprite.setFrame(newSprite.size() - 1, image)
+
+            currentSprite = newSprite
+            currentArchiveId = archiveId
+
+            val newData = newSprite.encode()
+            cacheLibrary.put(CacheIndex.SPRITES.id, archiveId, newData.array(), null)
+
+            loadFrames(archiveId)
+            frameList.selectedIndex = newSprite.size() - 1
+            zoom = 1.0
+            showFrame(newSprite.size() - 1)
+
+            JOptionPane.showMessageDialog(this, "New frame added successfully.")
+        } catch (e: Exception) {
+            e.printStackTrace()
+            JOptionPane.showMessageDialog(this, "Failed to add new frame: ${e.message}", "Error", JOptionPane.ERROR_MESSAGE)
+        }
+    }
+
+    private fun addNewArchiveWithFrame() {
+        try {
+            val pngFile = selectImageFile() ?: return
+            val image = ImageIO.read(pngFile) ?: return
+
+            val newSprite = Sprite(image.width, image.height, 1)
+            newSprite.setFrame(0, image)
+
+            val maxArchiveId = archiveListModel.elements().toList().maxOrNull() ?: -1
+            val newArchiveId = maxArchiveId + 1
+
+            val newData = newSprite.encode()
+            cacheLibrary.put(CacheIndex.SPRITES.id, newArchiveId, newData.array(), null)
+
+            archiveListModel.addElement(newArchiveId)
+            archiveList.selectedIndex = archiveListModel.size() - 1
+
+            JOptionPane.showMessageDialog(this, "New archive added with one frame (ID: $newArchiveId).")
+
+            loadFrames(newArchiveId)
+            frameList.selectedIndex = 0
+            zoom = 1.0
+            showFrame(0)
+        } catch (e: Exception) {
+            e.printStackTrace()
+            JOptionPane.showMessageDialog(this, "Failed to add new archive: ${e.message}", "Error", JOptionPane.ERROR_MESSAGE)
+        }
+    }
+
+    private fun deleteFrameFromArchive(archiveId: Int, frameIndex: Int) {
+        try {
+            val oldSprite = currentSprite ?: return
+            val frameCount = oldSprite.size()
+            if (frameCount <= 1) {
+                JOptionPane.showMessageDialog(this, "Cannot delete the last frame.", "Error", JOptionPane.ERROR_MESSAGE)
+                return
+            }
+
+            val newSprite = Sprite(oldSprite.width, oldSprite.height, frameCount - 1)
+
+            var newIdx = 0
+            for (i in 0 until frameCount) {
+                if (i == frameIndex) continue
+                newSprite.setFrame(newIdx, oldSprite.getFrame(i))
+                newIdx++
+            }
+
+            currentSprite = newSprite
+            currentArchiveId = archiveId
+
+            val newData = newSprite.encode()
+            cacheLibrary.put(CacheIndex.SPRITES.id, archiveId, newData.array(), null)
+
+            loadFrames(archiveId)
+            frameList.selectedIndex = if (frameIndex >= newSprite.size()) newSprite.size() - 1 else frameIndex
+            zoom = 1.0
+            showFrame(frameList.selectedValue ?: 0)
+
+            JOptionPane.showMessageDialog(this, "Frame deleted successfully.")
+        } catch (e: Exception) {
+            e.printStackTrace()
+            JOptionPane.showMessageDialog(this, "Failed to delete frame: ${e.message}", "Error", JOptionPane.ERROR_MESSAGE)
+        }
+    }
+
+    private fun removeArchive(archiveId: Int) {
+        try {
+            cacheLibrary.remove(CacheIndex.SPRITES.id, archiveId)
+
+            archiveListModel.removeElement(archiveId)
+            currentSprite = null
+            currentArchiveId = null
+            frameListModel.clear()
+            spriteLabel.icon = null
+
+            JOptionPane.showMessageDialog(this, "Archive $archiveId removed successfully.")
+        } catch (e: Exception) {
+            e.printStackTrace()
+            JOptionPane.showMessageDialog(this, "Failed to remove archive: ${e.message}", "Error", JOptionPane.ERROR_MESSAGE)
+        }
+    }
+
     private fun selectImageFile(): File? {
         val chooser = JFileChooser()
         chooser.dialogTitle = "Select PNG image"
@@ -276,41 +432,5 @@ class SpriteManager(private val cache: String) : JFrame("Sprite Manager") {
         chooser.fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
         val result = chooser.showSaveDialog(this)
         return if (result == JFileChooser.APPROVE_OPTION) chooser.selectedFile else null
-    }
-
-    private fun addFrame(archiveId: Int, pngFile: File) {
-        try {
-            val image = ImageIO.read(pngFile) ?: return
-            val oldSprite = currentSprite ?: return
-
-            if (image.width != oldSprite.width || image.height != oldSprite.height) {
-                JOptionPane.showMessageDialog(this, "New frame must be ${oldSprite.width}x${oldSprite.height} pixels.", "Error", JOptionPane.ERROR_MESSAGE)
-                return
-            }
-
-            val newSprite = Sprite(oldSprite.width, oldSprite.height, oldSprite.size() + 1)
-
-            for (i in 0 until oldSprite.size()) {
-                newSprite.setFrame(i, oldSprite.getFrame(i))
-            }
-
-            newSprite.setFrame(newSprite.size() - 1, image)
-
-            currentSprite = newSprite
-            currentArchiveId = archiveId
-
-            val newData = newSprite.encode() ?: return
-            cacheLibrary.put(CacheIndex.SPRITES.id, archiveId, newData.array(), null)
-
-            loadFrames(archiveId)
-            frameList.selectedIndex = newSprite.size() - 1
-            zoom = 1.0
-            showFrame(newSprite.size() - 1)
-
-            JOptionPane.showMessageDialog(this, "New frame added successfully.")
-        } catch (e: Exception) {
-            e.printStackTrace()
-            JOptionPane.showMessageDialog(this, "Failed to add new frame: ${e.message}", "Error", JOptionPane.ERROR_MESSAGE)
-        }
     }
 }
