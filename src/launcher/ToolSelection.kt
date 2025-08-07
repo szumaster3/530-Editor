@@ -1,15 +1,8 @@
 package launcher
 
 import com.displee.cache.CacheLibrary
-import com.misc.FileManager
 import com.misc.IndexManager
 import com.misc.extract.IndexExport
-import com.editor.item.ItemListExport
-import com.editor.item.ItemSelection
-import com.editor.npc.NPCListExport
-import com.editor.npc.NPCSelection
-import com.editor.`object`.ObjectListExport
-import com.editor.`object`.ObjectSelection
 import com.misc.transfer.IndexTransfer
 import com.misc.transfer.InterfaceTransfer
 import com.misc.transfer.RegionTransfer
@@ -273,24 +266,6 @@ class ToolSelection : JFrame() {
     private fun submitButtonActionPerformed(evt: ActionEvent) {
         val toolID = selectionBox.selectedIndex
         when (toolID) {
-            0 -> try {
-                ItemSelection(cache).isVisible = true; Main.log(toolSelected, startMessage)
-            } catch (e: IOException) {
-                Main.log(toolSelected, failMessage)
-            }
-
-            1 -> try {
-                NPCSelection(cache).isVisible = true; Main.log(toolSelected, startMessage)
-            } catch (e: IOException) {
-                Main.log(toolSelected, failMessage)
-            }
-
-            2 -> try {
-                ObjectSelection(cache).isVisible = true; Main.log(toolSelected, startMessage)
-            } catch (e: IOException) {
-                Main.log(toolSelected, failMessage)
-            }
-
             3 -> try {
                 RegionTransfer(cache).isVisible = true; Main.log(toolSelected, startMessage)
             } catch (e: IOException) {
@@ -311,15 +286,6 @@ class ToolSelection : JFrame() {
             } catch (e: IOException) {
                 Main.log(toolSelected, failMessage)
             }
-
-            7 ->
-                try {
-                    val lib = CacheLibrary.create(cache)
-                    exportDefinitionList(lib)
-                    Main.log(toolSelected, startMessage)
-                } catch (e: IOException) {
-                    Main.log(toolSelected, failMessage)
-                }
             8 ->
                 try {
                     IndexExport().isVisible = true
@@ -339,14 +305,6 @@ class ToolSelection : JFrame() {
                     SwingUtilities.invokeLater { ColorPicker().isVisible = true }
                     Main.log(toolSelected, startMessage)
                 } catch (e: IOException) {
-                    Main.log(toolSelected, failMessage)
-                }
-            11 ->
-                try {
-                    val lib = CacheLibrary.create(cache)
-                    FileManager(lib).isVisible = true
-                    Main.log(toolSelected, startMessage)
-                } catch (e: Exception) {
                     Main.log(toolSelected, failMessage)
                 }
             12 ->
@@ -489,67 +447,6 @@ class ToolSelection : JFrame() {
                 fis.copyTo(zos)
                 zos.closeEntry()
             }
-        }
-    }
-
-    private fun exportDefinitionList(cache: CacheLibrary) {
-        val panel = JPanel().apply {
-            layout = BoxLayout(this, BoxLayout.Y_AXIS)
-            border = EmptyBorder(5, 5, 5, 5)
-        }
-
-        val npcButton = JButton("NPC Export").apply {
-            alignmentX = Component.CENTER_ALIGNMENT
-            preferredSize = Dimension(70, 20)
-            addActionListener {
-                try {
-                    NPCListExport(cache.path)
-                    Main.log("NPC Export", "Export complete.")
-                } catch (e: IOException) {
-                    Main.log("NPC Export", "NPC export failed.")
-                }
-            }
-        }
-
-        val itemButton = JButton("Item Export").apply {
-            alignmentX = Component.CENTER_ALIGNMENT
-            preferredSize = Dimension(70, 20)
-            addActionListener {
-                try {
-                    ItemListExport(cache.path)
-                    Main.log("Item Export", "Export complete.")
-                } catch (e: IOException) {
-                    Main.log("Item Export", "Item export failed.")
-                }
-            }
-        }
-
-        val objectButton = JButton("Object Export").apply {
-            alignmentX = Component.CENTER_ALIGNMENT
-            preferredSize = Dimension(70, 20)
-            addActionListener {
-                try {
-                    ObjectListExport(cache.path)
-                    Main.log("Object Export", "Export complete.")
-                } catch (e: IOException) {
-                    Main.log("Object Export", "Object export failed.")
-                }
-            }
-        }
-
-        panel.add(npcButton)
-        panel.add(Box.createRigidArea(Dimension(0, 10)))
-        panel.add(itemButton)
-        panel.add(Box.createRigidArea(Dimension(0, 10)))
-        panel.add(objectButton)
-
-        val frame = JFrame("Export Lists").apply {
-            defaultCloseOperation = DISPOSE_ON_CLOSE
-            contentPane = panel
-            preferredSize = Dimension(140, 170)
-            pack()
-            setLocationRelativeTo(null)
-            isVisible = true
         }
     }
 }
