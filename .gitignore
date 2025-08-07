@@ -4,3 +4,4 @@ build
 .gradle
 data
 main_file_cache.*
+.idea

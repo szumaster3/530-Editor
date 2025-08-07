@@ -1,29 +1,18 @@
 ## 530-Editor
 
-[![License][License: AGPL v3]][license-url] [![License][Shield: Fork]][fork-url]
+[![License][License: AGPL v3]][license-url] [![License][Shield: Fork]][fork-url] [![Cache][Cache: v2]][cache-url]
 
-*Under development.*
 
-***
 
-### 2.0.0 Release
+[Cache: v2]: https://img.shields.io/badge/CacheTool-V2-g.svg
 
-We are excited to announce the release of a new version of the editor, now available for testing!
+[cache-url]: https://szumaster.com/content/menu/editor.html
 
-This editor should work with cache versions `508` to `718`; however, compatibility is not guaranteed.
-
-**Please note**:
-- This is a demo version.
-- It does not include the official theme.
-- Feel free to try it out and report any issues or suggestions [here](https://github.com/szumaster3/530-Editor/issues) or [here](https://gitlab.com/rspsdev/530-Editor/-/issues).
-
-Download: [Cache Editor 2.0.0](https://mega.nz/folder/mq5z3AJQ#J8BZQmhTsSwGj6gxVEGFhA)
-
-[License: AGPL v3]: https://img.shields.io/badge/License-AGPL%20v3-khaki.svg
+[License: AGPL v3]: https://img.shields.io/badge/License-AGPL%20v3-g.svg
 
 [license-url]: https://www.gnu.org/licenses/agpl-3.0.en.html
 
-[Shield: Fork]: https://img.shields.io/badge/repository-fork-tan
+[Shield: Fork]: https://img.shields.io/badge/Repository-fork-g
 
 [fork-url]: https://gitlab.com/2009scape/tools/2009scape-item-definition-editor
 
